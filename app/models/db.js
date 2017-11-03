@@ -6,7 +6,10 @@ mongoose.Promise = global.Promise;
 let dbURI = 'mongodb://localhost/myTweet';
 //dbURI = 'mongodb://my-tweet-username:my-tweet-password@ds245805.mlab.com:45805/my-tweet-web';
 
-//heroku config:set MONGOLAB_URI=mongodb:
+// heroku config:set NODE_ENV="production"
+// heroku config:set MONGOLAB_URI=mongodb://my-tweet-username:my-tweet-password@ds245805.mlab.com:45805/my-tweet-web
+
+
 
 
 if (process.env.NODE_ENV === 'production') {
