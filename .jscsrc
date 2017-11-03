@@ -77,6 +77,7 @@
   "requireShorthandArrowFunctions": true,
   "safeContextKeyword": "_this",
   "validateQuoteMarks": { "mark": "'", "escape": true, "ignoreJSX": true },
+  "validateLineBreaks": "CRLF",
   "validateIndentation": 2,
   "maximumLineLength": 100
 }

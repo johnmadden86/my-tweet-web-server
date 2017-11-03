@@ -8,27 +8,39 @@ function setCookie(request, userId) {
     loggedIn: true,
     loggedInUser: userId,
   });
+  console.log('Cookie set: ' + userId);
+}
+
+function clearCookie(request) {
+  request.cookieAuth.set({
+    loggedIn: false,
+    loggedInUser: null,
+  });
+}
+
+function getLoggedInUser(request) {
+  const userId = request.auth.credentials.loggedInUser;
+  return User.findOne({ _id: userId });
 }
 
 exports.main = {
   auth: false,
   handler: function (request, reply) {
-    reply.view('main', { title: 'Welcome to Donations' });
+    reply.view('main', { title: 'Welcome to MyTweet' });
   },
 };
 
 exports.signup = {
   auth: false,
   handler: function (request, reply) {
-    reply.view('signup', { title: 'Sign up for Donations' });
+    reply.view('signup', { title: 'Sign up for MyTweet' });
   },
 };
 
 exports.login = {
   auth: false,
-
   handler: function (request, reply) {
-    reply.view('login', { title: 'Login to Donations' });
+    reply.view('login', { title: 'Login to MyTweet' });
   },
 };
 
@@ -55,11 +67,12 @@ exports.register = {
 
   handler:
       function (request, reply) {
-        const user = new User(request.payload);
-        user.save().then(newUser => {
-          setCookie(request, user._id);
-          reply.redirect('/home');
-        }).catch(err => {
+        new User(request.payload)
+            .save()
+            .then(newUser => {
+              setCookie(request, newUser._id);
+              reply.redirect('/home');
+            }).catch(err => {
           reply.redirect('/');
         });
       },
@@ -88,9 +101,10 @@ exports.authenticate = {
 
   handler: function (request, reply) {
     const user = request.payload;
-    User.findOne({ id: user._id }).then(foundUser => {
+    console.log(user);
+    User.findOne({ email: user.email }).then(foundUser => {
       if (foundUser && foundUser.password === user.password) {
-        setCookie(request, user._id);
+        setCookie(request, foundUser._id);
         reply.redirect('/home');
       } else {
         reply.redirect('/login');
@@ -104,14 +118,14 @@ exports.authenticate = {
 exports.logout = {
   auth: false,
   handler: function (request, reply) {
+    clearCookie(request);
     reply.redirect('/');
   },
 };
 
 exports.viewSettings = {
   handler: function (request, reply) {
-    const userId = request.auth.credentials.loggedInUser;
-    User.findOne({ id: userId }).then(foundUser => {
+    getLoggedInUser(request).then(foundUser => {
       reply.view('settings', { title: 'Edit Account Settings', user: foundUser });
     }).catch(err => {
       reply.redirect('/home');
@@ -131,10 +145,15 @@ exports.updateSettings = {
       abortEarly: false,
     },
     failAction: function (request, reply, source, error) {
-      reply.view('settings', {
-        title: 'Sign up error',
-        errors: error.data.details,
-      }).code(400);
+      getLoggedInUser(request).then(foundUser => {
+        reply.view('settings', {
+          title: 'Update error',
+          user: foundUser,
+          errors: error.data.details,
+        }).code(400);
+      }).catch(err => {
+        reply.redirect('/home');
+      });
     },
   },
 
