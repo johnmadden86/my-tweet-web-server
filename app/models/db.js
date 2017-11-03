@@ -4,14 +4,10 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 let dbURI = 'mongodb://localhost/myTweet';
+//dbURI = 'mongodb://my-tweet-username:my-tweet-password@ds245805.mlab.com:45805/my-tweet-web';
 
 //heroku config:set MONGOLAB_URI=mongodb:
-// donationuser:donationuser@ds113455.mlab.com:13455/donation
 
-//address: ds113455.mlab.com
-//port: 13455
-//database: donationuser
-//password: donationuser
 
 if (process.env.NODE_ENV === 'production') {
   dbURI = process.env.MONGOLAB_URI;
