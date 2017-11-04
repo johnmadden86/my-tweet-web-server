@@ -1,13 +1,13 @@
 'use strict';
 
-const Candidate = require('../models/candidate');
+const Tweet = require('../models/tweet');
 const Boom = require('boom');
 
 exports.find = {
   auth: false,
   handler: function (request, reply) {
-    Candidate.find({}).exec().then(candidates => {
-      reply(candidates);
+    Tweet.find({}).exec().then(tweets => {
+      reply(tweets);
     }).catch(err => {
       reply(Boom.badImplementation('error accessing db'));
     });
@@ -17,8 +17,8 @@ exports.find = {
 exports.findOne = {
   auth: false,
   handler: function (request, reply) {
-    Candidate.findOne({ _id: request.params.id }).then(candidate => {
-      reply(candidate);
+    Tweet.findOne({ _id: request.params.id }).then(tweet => {
+      reply(tweet);
     }).catch(err => {
       reply(Boom.notFound('id not found'));
     });
@@ -28,11 +28,11 @@ exports.findOne = {
 exports.create = {
   auth: false,
   handler: function (request, reply) {
-    const candidate = new Candidate(request.payload);
-    candidate.save().then(newCandidate => {
-      reply(newCandidate).code(201);
+    const tweet = new Tweet(request.payload);
+    tweet.save().then(newTweet => {
+      reply(newTweet).code(201);
     }).catch(err => {
-      reply(Boom.badImplementation('error creating candidate'));
+      reply(Boom.badImplementation('error creating tweet'));
     });
   },
 };
@@ -40,10 +40,10 @@ exports.create = {
 exports.deleteAll = {
   auth: false,
   handler: function (request, reply) {
-    Candidate.remove({}).then(err => {
+    Tweet.remove({}).then(err => {
       reply().code(204);
     }).catch(err => {
-      reply(Boom.badImplementation('error removing candidates'));
+      reply(Boom.badImplementation('error removing tweets'));
     });
   },
 };
@@ -51,8 +51,8 @@ exports.deleteAll = {
 exports.deleteOne = {
   auth: false,
   handler: function (request, reply) {
-    Candidate.remove({ _id: request.params.id }).then(candidate => {
-      reply(candidate).code(204);
+    Tweet.remove({ _id: request.params.id }).then(tweet => {
+      reply(tweet).code(204);
     }).catch(err => {
       reply(Boom.notFound('id not found'));
     });

@@ -4,10 +4,15 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 
 let dbURI = 'mongodb://localhost/myTweet';
-//dbURI = 'mongodb://my-tweet-username:my-tweet-password@ds245805.mlab.com:45805/my-tweet-web';
+//dbURI = 'mongodb://mytweetwebusername:mytweetwebpassword@ds245805.mlab.com:45805/mytweetweb';
 
 // heroku config:set NODE_ENV="production"
-// heroku config:set MONGOLAB_URI=mongodb://my-tweet-username:my-tweet-password@ds245805.mlab.com:45805/my-tweet-web
+// heroku config:set MONGOLAB_URI=mongodb://mytweetwebusername:mytweetwebpassword@ds245805.mlab.com:45805/mytweetweb
+// username: mytweetwebusername
+// password: mytweetwebpassword
+// address: ds245805.mlab.com
+// port:45805
+// database: my-tweet-web
 
 
 
@@ -27,7 +32,8 @@ mongoose.connection.on('connected', function () {
     const User = require('./user');
     seeder.seed(data, { dropDatabase: false, dropCollections: true }).then(dbData => {
       console.log('preloading Test Data');
-      console.log(dbData);
+
+      //console.log(dbData);
     }).catch(err => {
       console.log(error);
     });

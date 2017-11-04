@@ -46,19 +46,23 @@ exports.timeline = {
 
 exports.profile = {
   handler: function (request, reply) {
+    const userId = request.params._id; // profile to view
     getLoggedInUser(request) // finds logged in user only
-        .then(user => {
-          Tweet.find({ author: user }) // only finds tweets composed by current user
-              .populate('author')
-              .then(userTweets => {
-                reply.view('profile', {
-                  title: 'Profile',
-                  tweets: userTweets,
-                  user: user,
+        .then(loggedInUser => {
+          User.findOne({ _id: userId }) // finds user profile to view
+              .then(user => {
+                Tweet.find({ author: user }) // only finds tweets composed by user to view
+                    .populate('author')
+                    .then(userTweets => {
+                      reply.view('profile', {
+                        title: 'Profile',
+                        tweets: userTweets,
+                        user: loggedInUser,
+                      });
+                    }).catch(err => {
+                  reply.redirect('./home');
                 });
-              }).catch(err => {
-            reply.redirect('./home');
-          });
+              });
         });
   },
 };
@@ -106,7 +110,6 @@ exports.tweet = {
           }).catch(err => {
         reply.redirect('./home');
       });
-
     },
   },
 

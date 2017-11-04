@@ -6,9 +6,10 @@ const Boom = require('boom');
 exports.find = {
   auth: false,
   handler: function (request, reply) {
-    User.find({}).exec().then(candidates => {
-      reply(candidates);
-    }).catch(err => {
+    User.find({}).exec()
+        .then(users => {
+          reply(users);
+        }).catch(err => {
       reply(Boom.badImplementation('error accessing db'));
     });
   },
@@ -17,9 +18,10 @@ exports.find = {
 exports.findOne = {
   auth: false,
   handler: function (request, reply) {
-    User.findOne({ _id: request.params.id }).then(candidate => {
-      reply(candidate);
-    }).catch(err => {
+    User.findOne({ _id: request.params.id })
+        .then(user => {
+          reply(user);
+        }).catch(err => {
       reply(Boom.notFound('id not found'));
     });
   },
@@ -29,9 +31,10 @@ exports.create = {
   auth: false,
   handler: function (request, reply) {
     const user = new User(request.payload);
-    user.save().then(newUser => {
-      reply(newUser).code(201);
-    }).catch(err => {
+    user.save()
+        .then(newUser => {
+          reply(newUser).code(201);
+        }).catch(err => {
       reply(Boom.badImplementation('error creating user'));
     });
   },
@@ -40,9 +43,10 @@ exports.create = {
 exports.deleteAll = {
   auth: false,
   handler: function (request, reply) {
-    User.remove({}).then(err => {
-      reply().code(204);
-    }).catch(err => {
+    User.remove({})
+        .then(err => {
+          reply().code(204);
+        }).catch(err => {
       reply(Boom.badImplementation('error removing users'));
     });
   },
@@ -51,8 +55,8 @@ exports.deleteAll = {
 exports.deleteOne = {
   auth: false,
   handler: function (request, reply) {
-    User.remove({ _id: request.params.id }).then(candidate => {
-      reply(candidate).code(204);
+    User.remove({ _id: request.params.id }).then(user => {
+      reply(user).code(204);
     }).catch(err => {
       reply(Boom.notFound('id not found'));
     });

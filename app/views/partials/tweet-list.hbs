@@ -18,7 +18,9 @@
           <tr>
             <td> {{text}} </td>
             <td> {{date}} </td>
-            <td>{{author.firstName}} {{author.lastName}}</td>
+            <td> <a id="home" class= "item" href="/profile/{{author._id}}">
+              {{author.firstName}} {{author.lastName}}
+            </a> </td>
           </tr>
         {{/each}}
         </tbody>
