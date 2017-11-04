@@ -7,16 +7,19 @@
       <table class="ui celled table segment">
         <thead>
         <tr>
-          <th>Date</th>
-          <th>Message</th>
+          <th colspan="2">Message</th>
         </tr>
         </thead>
         <tbody>
         <tr>
         {{#each tweets}}
           <tr>
-            <td> {{date}} </td>
-            <td> {{text}} </td>
+            <td title="{{date}}"> {{text}} </td>
+            <td>
+              <a href="/delete-tweet/{{_id}}">
+                <i class="trash outline icon"></i>
+              </a>
+            </td>
           </tr>
         {{/each}}
         </tbody>

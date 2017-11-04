@@ -8,7 +8,6 @@
         <thead>
         <tr>
           <th>Message</th>
-          <th>Date</th>
           <th>User</th>
         </tr>
         </thead>
@@ -16,11 +15,12 @@
         <tr>
         {{#each tweets}}
           <tr>
-            <td> {{text}} </td>
-            <td> {{date}} </td>
-            <td> <a id="home" class= "item" href="/profile/{{author._id}}">
-              {{author.firstName}} {{author.lastName}}
-            </a> </td>
+            <td title="{{date}}"> {{text}} </td>
+            <td>
+              <a href="/profile/{{author._id}}">
+                {{author.firstName}} {{author.lastName}}
+              </a>
+            </td>
           </tr>
         {{/each}}
         </tbody>

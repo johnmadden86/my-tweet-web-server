@@ -16,7 +16,8 @@ module.exports = [
   { method: 'GET', path: '/home', config: Tweets.home },
   { method: 'GET', path: '/profile/{_id}', config: Tweets.profile },
   { method: 'GET', path: '/timeline', config: Tweets.timeline },
-  { method: 'POST', path: '/donate', config: Tweets.tweet },
+  { method: 'POST', path: '/tweet', config: Tweets.tweet },
+  { method: 'GET', path: '/delete-tweet/{_id}', config: Tweets.delete },
 
   {
     method: 'GET',
