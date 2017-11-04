@@ -4,10 +4,10 @@
       <img src="../images/homer5.jpg" class="ui medium image">
     </aside>
     <article class="ten wide column">
-      <table class="ui celled table segment">
+      <table class="ui collapsing table segment">
         <thead>
         <tr>
-          <th colspan="2">Message</th>
+          <th colspan="2">Tweets for {{profile.firstName}} {{profile.lastName}}</th>
         </tr>
         </thead>
         <tbody>
@@ -15,13 +15,20 @@
         {{#each tweets}}
           <tr>
             <td title="{{date}}"> {{text}} </td>
-            <td>
-              <a href="/delete-tweet/{{_id}}">
+            <td class="center aligned">
+              <a title="Delete Tweet" href="/delete-tweet/{{_id}}">
                 <i class="trash outline icon"></i>
               </a>
             </td>
           </tr>
         {{/each}}
+        <tr>
+          <td colspan="2" class="right aligned">
+          <a title="Delete All" href="/delete-all">
+            <i class="large trash icon"></i>
+          </a>
+          </td>
+        </tr>
         </tbody>
       </table>
     </article>

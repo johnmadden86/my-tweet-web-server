@@ -58,6 +58,7 @@ exports.profile = {
                         title: 'Profile',
                         tweets: userTweets,
                         user: loggedInUser,
+                        profile: user,
                       });
                     }).catch(err => {
                   reply.redirect('./home');
@@ -132,10 +133,23 @@ exports.tweet = {
 exports.delete = {
   handler: function (request, reply) {
     const tweetId = request.params._id;
-    console.log(tweetId);
     getLoggedInUser(request)
         .then(user => {
           Tweet.remove({ _id: tweetId })
+              .then(tweet => {
+                reply.redirect('/profile/' + user._id);
+              }).catch(err => {
+            reply.redirect('/home');
+          });
+        });
+  },
+};
+
+exports.deleteAll = {
+  handler: function (request, reply) {
+    getLoggedInUser(request)
+        .then(user => {
+          Tweet.remove({ author: user._id })
               .then(tweet => {
                 reply.redirect('/profile/' + user._id);
               }).catch(err => {

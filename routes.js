@@ -18,6 +18,7 @@ module.exports = [
   { method: 'GET', path: '/timeline', config: Tweets.timeline },
   { method: 'POST', path: '/tweet', config: Tweets.tweet },
   { method: 'GET', path: '/delete-tweet/{_id}', config: Tweets.delete },
+  { method: 'GET', path: '/delete-all', config: Tweets.deleteAll },
 
   {
     method: 'GET',
