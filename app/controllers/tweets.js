@@ -50,15 +50,20 @@ exports.profile = {
     getLoggedInUser(request) // finds logged in user only
         .then(loggedInUser => {
           User.findOne({ _id: userId }) // finds user profile to view
-              .then(user => {
-                Tweet.find({ author: user }) // only finds tweets composed by user to view
+              .then(profileUser => {
+                Tweet.find({ author: profileUser }) // only finds tweets composed by user to view
                     .populate('author')
                     .then(userTweets => {
                       reply.view('profile', {
                         title: 'Profile',
                         tweets: userTweets,
                         user: loggedInUser,
-                        profile: user,
+                        profile: profileUser,
+                        own: function () {
+                          // removes delete options when viewing another user's profile
+                          // exception for admin users
+                          return loggedInUser._id.toString() === profileUser._id.toString() || loggedInUser.admin === true;
+                        },
                       });
                     }).catch(err => {
                   reply.redirect('./home');

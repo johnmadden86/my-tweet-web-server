@@ -29,11 +29,6 @@
     button.setAttributeNode(disabled);
     button.disabled = tweetLength === 0 || tweetLength > 140;
 
-    if (tweetLength > 140) {
-      charDisplay.classList.add('red');
-    } else {
-      charDisplay.classList.remove('red');
-    }
-
+    tweetLength > 140 ? charDisplay.classList.add('red') : charDisplay.classList.remove('red');
   }
 </script>

@@ -30,6 +30,13 @@ exports.main = {
   },
 };
 
+exports.admin = {
+  auth: false,
+  handler: function (request, reply) {
+    reply.view('adminsignup', { title: 'Register New Admin' });
+  },
+};
+
 exports.signup = {
   auth: false,
   handler: function (request, reply) {
@@ -67,11 +74,65 @@ exports.register = {
 
   handler:
       function (request, reply) {
-        new User(request.payload)
+        const data = request.payload;
+        data.admin = false;
+        new User(data)
             .save()
             .then(newUser => {
               setCookie(request, newUser._id);
               reply.redirect('/home');
+            }).catch(err => {
+          reply.redirect('/');
+        });
+      },
+};
+
+exports.registerAdmin = {
+  auth: false,
+
+  validate: {
+    payload: {
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+      adminPassword: Joi.string().required(),
+    },
+    options: {
+      abortEarly: false,
+    },
+    failAction: function (request, reply, source, error) {
+      reply.view('signup', {
+        title: 'Sign up error',
+        errors: error.data.details,
+      }).code(400);
+    },
+  },
+
+  handler:
+      function (request, reply) {
+        const data = request.payload;
+        User.findOne({
+          $and: [
+            { admin: true },
+            { password: data.adminPassword },
+          ],
+        })
+            .then(foundAdmin => {
+              if (foundAdmin.admin === true && foundAdmin.password === data.adminPassword) {
+                delete data.adminPassword;
+                data.admin = true;
+                new User(data)
+                    .save()
+                    .then(newUser => {
+                      setCookie(request, newUser._id);
+                      reply.redirect('/home');
+                    }).catch(err => {
+                  reply.redirect('/');
+                });
+              } else {
+                reply.redirect('/');
+              }
             }).catch(err => {
           reply.redirect('/');
         });
