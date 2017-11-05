@@ -1,6 +1,9 @@
 <nav class="ui inverted menu">
   <header class="header item"><a href="/"> {{user.firstName}} {{user.lastName}} </a></header>
   <div class="right menu">
+    {{#if user.admin}}
+      <a id="users" class= "item" href="/users"> Users </a>
+    {{/if}}
     <a id="home" class= "item" href="/home"> Tweet </a>
     <a id="profile" class= "item" href="/profile/{{user._id}}"> Profile </a>
     <a id="timeline" class= "item" href="/timeline"> Timeline </a>

@@ -15,6 +15,13 @@
       "password": "secret",
       "admin": false
     },
+    "admin": {
+      "firstName": "Super",
+      "lastName": "User",
+      "email": "super@user.com",
+      "password": "superuser",
+      "admin": true
+    },
     "bart": {
       "firstName": "Bart",
       "lastName": "Simpson",

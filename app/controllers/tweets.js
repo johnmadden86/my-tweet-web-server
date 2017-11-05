@@ -22,6 +22,24 @@ exports.home = {
   },
 };
 
+exports.users = {
+  handler: function (request, reply) {
+    getLoggedInUser(request)
+        .then(loggedInUser => {
+          User.find({ admin: false })
+              .then(allUsers => {
+                reply.view('users', {
+                  title: 'Remove Users',
+                  user: loggedInUser,
+                  users: allUsers,
+                });
+              }).catch(err => {
+            redirect('./home');
+          });
+        });
+  },
+};
+
 exports.timeline = {
   handler: function (request, reply) {
     getLoggedInUser(request)
@@ -73,26 +91,29 @@ exports.profile = {
   },
 };
 
+/* method not used */
 exports.filter = {
   handler: function (request, reply) {
+    const searchTerm = request.params.searchTerm;
     getLoggedInUser(request).then(user => {
-      Tweet.find(
-          {
-            text: {
-              //TO-DO
-              $regex: /string/i, // e.g. return tweets matching search term
-            },
-          }
-      ).populate('author')
-          .then(filteredTweets => {
-            reply.view('profile', {
-              title: 'Profile',
-              tweets: filteredTweets,
-              user: user,
+      User.find({}) //find all users, no filter
+          .then(users => {
+            Tweet.find({
+              text: {
+                $regex: '/' + searchTerm + '/i', // e.g. return tweets matching search term. case insenstive
+              },
+            })
+                .populate('author')
+                .then(filteredTweets => {
+                  reply.view('/search', {
+                    title: 'Timeline',
+                    tweets: filteredTweets,
+                    user: user,
+                  });
+                }).catch(err => {
+              reply.redirect('./home');
             });
-          }).catch(err => {
-        reply.redirect('./home');
-      });
+          });
     });
   },
 };
@@ -135,7 +156,7 @@ exports.tweet = {
   },
 };
 
-exports.delete = {
+exports.deleteTweet = {
   handler: function (request, reply) {
     const tweetId = request.params._id;
     getLoggedInUser(request)
@@ -150,13 +171,42 @@ exports.delete = {
   },
 };
 
-exports.deleteAll = {
+exports.deleteUser = {
+  handler: function (request, reply) {
+    const userId = request.params._id;
+    getLoggedInUser(request)
+        .then(user => {
+          User.remove({ _id: userId })
+              .then(tweet => {
+                reply.redirect('/users');
+              }).catch(err => {
+            reply.redirect('/home');
+          });
+        });
+  },
+};
+
+exports.deleteAllTweets = {
   handler: function (request, reply) {
     getLoggedInUser(request)
         .then(user => {
           Tweet.remove({ author: user._id })
               .then(tweet => {
                 reply.redirect('/profile/' + user._id);
+              }).catch(err => {
+            reply.redirect('/home');
+          });
+        });
+  },
+};
+
+exports.deleteAllUsers = {
+  handler: function (request, reply) {
+    getLoggedInUser(request)
+        .then(user => {
+          User.remove({ admin: false })
+              .then(tweet => {
+                reply.redirect('/users');
               }).catch(err => {
             reply.redirect('/home');
           });
