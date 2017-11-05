@@ -47,6 +47,7 @@ exports.timeline = {
           User.find({}) //find all users, no filter
               .then(user => {
                 Tweet.find({}) // find all tweets, no filter
+                    .sort({ date: -1 }) //reverse chron sort
                     .populate('author') //populates author for each tweet
                     .then(allTweets => {
                       reply.view('timeline', {
@@ -70,6 +71,7 @@ exports.profile = {
           User.findOne({ _id: userId }) // finds user profile to view
               .then(profileUser => {
                 Tweet.find({ author: profileUser }) // only finds tweets composed by user to view
+                    .sort({ date: -1 })
                     .populate('author')
                     .then(userTweets => {
                       reply.view('profile', {
