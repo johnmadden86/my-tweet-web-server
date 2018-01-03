@@ -154,7 +154,9 @@ exports.tweet = {
               }).catch(err => {
             reply.redirect('/home');
           });
-        });
+        }).catch(err => {
+      reply.redirect('/home');
+    });
   },
 };
 

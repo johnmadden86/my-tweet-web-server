@@ -2,12 +2,17 @@
 
 const Hapi = require('hapi');
 
-let server = new Hapi.Server();
+const server = new Hapi.Server();
 server.connection({ port: process.env.PORT || 4000 });
 
 require('./app/models/db');
 
-server.register([require('inert'), require('vision'), require('hapi-auth-cookie')], err => {
+server.register([
+        require('inert'),
+        require('vision'),
+        require('hapi-auth-cookie'),
+        require('hapi-auth-jwt2'),
+], err => {
 
   if (err) {
     throw err;
@@ -27,7 +32,7 @@ server.register([require('inert'), require('vision'), require('hapi-auth-cookie'
 
   server.auth.strategy('standard', 'cookie', {
     password: 'secretpasswordnotrevealedtoanyone',
-    cookie: 'donation-cookie',
+    cookie: 'my-tweet-cookie',
     isSecure: false,
     ttl: 24 * 60 * 60 * 1000,
     redirectTo: '/login',

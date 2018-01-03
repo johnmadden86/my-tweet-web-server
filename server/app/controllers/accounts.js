@@ -76,6 +76,7 @@ exports.register = {
       function (request, reply) {
         const data = request.payload;
         data.admin = false;
+        data.tweets = [];
         new User(data)
             .save()
             .then(newUser => {
@@ -163,16 +164,18 @@ exports.authenticate = {
   handler: function (request, reply) {
     const user = request.payload;
     console.log(user);
-    User.findOne({ email: user.email }).then(foundUser => {
-      if (foundUser && foundUser.password === user.password) {
-        setCookie(request, foundUser._id);
-        reply.redirect('/home');
-      } else {
-        reply.redirect('/login');
-      }
-    }).catch(err => {
-      reply.redirect('/');
-    });
+    User.findOne({ email: user.email })
+        .then(foundUser => {
+          if (foundUser && foundUser.password === user.password) {
+            setCookie(request, foundUser._id);
+            reply.redirect('/home');
+          } else {
+            reply.redirect('/login');
+          }
+        })
+        .catch(err => {
+          reply.redirect('/');
+        });
   },
 };
 

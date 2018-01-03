@@ -30,6 +30,10 @@ exports.create = {
   handler: function (request, reply) {
     const tweet = new Tweet(request.payload);
     tweet.save().then(newTweet => {
+      console.log(newTweet);
+      const author = newTweet.author;
+      delete newTweet.author;
+      author.tweets.push(newTweet);
       reply(newTweet).code(201);
     }).catch(err => {
       reply(Boom.badImplementation('error creating tweet'));
