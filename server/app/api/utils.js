@@ -22,15 +22,17 @@ exports.decodeToken = function (token) {
 };
 
 exports.validate = function (decoded, request, callback) {
-  User.findOne({ _id: decoded.id }).then(user => {
-    if (user !== null) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  }).catch(err => {
-    callback(null, false);
-  });
+  User.findOne({ _id: decoded.id })
+      .then(user => {
+        if (user !== null) {
+          callback(null, true);
+        } else {
+          callback(null, false);
+        }
+      })
+      .catch(err => {
+        callback(null, false);
+      });
 };
 
 exports.getUserIdFromRequest = function (request) {

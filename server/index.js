@@ -1,8 +1,10 @@
 'use strict';
 
 const Hapi = require('hapi');
-
+const corsHeaders = require('hapi-cors-headers');
 const server = new Hapi.Server();
+const utils = require('./app/api/utils');
+
 server.connection({ port: process.env.PORT || 4000 });
 
 require('./app/models/db');
@@ -38,10 +40,17 @@ server.register([
     redirectTo: '/login',
   });
 
+  server.auth.strategy('jwt', 'jwt', {
+    key: 'secretpasswordnotrevealedtoanyone',
+    validateFunc: utils.validate,
+    verifyOptions: { algorithms: ['HS256'] },
+  });
+
   server.auth.default({
     strategy: 'standard',
   });
 
+  server.ext('onPreResponse', corsHeaders);
   server.route(require('./routes'));
   server.route(require('./routesapi'));
 

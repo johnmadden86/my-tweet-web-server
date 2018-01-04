@@ -1,8 +1,7 @@
 'use strict';
 
 const assert = require('chai').assert;
-// const request = require('sync-request');
-const DonationService = require('./donation-service');
+const TweetService = require('./tweet-service');
 const fixtures = require('./fixtures.json');
 const _ = require('lodash');
 const uuid = require('uuid');
@@ -12,132 +11,70 @@ suite('User API tests', function () {
   let users = fixtures.users;
   let newUser = fixtures.newUser;
 
-  const donationService = new DonationService(fixtures.donationService);
+  const tweetService = new TweetService(fixtures.tweetService);
 
   beforeEach(function () {
-    donationService.deleteAllUsers();
+    tweetService.login(users[0]);
+
+    //tweetService.deleteAllUsers();
   });
 
   afterEach(function () {
-    donationService.deleteAllUsers();
+    //tweetService.deleteAllUsers();
+    tweetService.logout();
   });
 
   test('create a user', function () {
-    const returnedUser = donationService.createUser(newUser);
+    const returnedUser = tweetService.createUser(newUser);
     assert(_.some([returnedUser], newUser), 'returnedUser must be a superset of newUser');
     assert.isDefined(returnedUser._id);
   });
 
   test('get user', function () {
-    const u1 = donationService.createUser(newUser);
-    const u2 = donationService.getUser(u1._id);
+    const u1 = tweetService.createUser(newUser);
+    const u2 = tweetService.getUser(u1._id);
     assert.deepEqual(u1, u2);
   });
 
   test('get invalid user', function () {
-    const id = uuid();
-    const u = donationService.getUser(id);
-    assert.isNull(u);
+    const u1 = tweetService.getUser(uuid());
+    assert.isNull(u1);
   });
 
   test('delete a user', function () {
-    const c = donationService.createUser(newUser);
-    assert(donationService.getUser(c._id) !== null);
-    donationService.deleteOneUser(c._id);
-    assert(donationService.getUser(c._id) === null);
+    const u = tweetService.createUser(newUser);
+    const returnedUsers = tweetService.getUsers();
+    const userId = returnedUsers[0]._id;
+    assert(tweetService.getUser(userId) != null);
+    tweetService.deleteOneUser(userId);
+    assert(tweetService.getUser(userId) == null);
   });
 
-  test('get all users', function () {
-    for (let u of users) {
-      donationService.createUser(u);
-    }
-
-    const allUsers = donationService.getUsers();
-    assert.equal(allUsers.length, users.length);
-  });
+  // test('get all users', function () {
+  //   for (let u of users) {
+  //     tweetService.createUser(u);
+  //   }
+  //
+  //   const allUsers = tweetService.getUsers();
+  //   assert.equal(allUsers.length, users.length);
+  // });
 
   test('get users detail', function () {
-    for (let u of users) {
-      donationService.createUser(u);
-    }
-
-    const allUsers = donationService.getUsers();
     for (let i = 0; i < users.length; i++) {
-      assert(_.some([allUsers[i]], users[i]), 'returnedUser must be a superset of newUser');
+      tweetService.createUser(users[i]);
+    }
+
+    const allUsers = tweetService.getUsers();
+    for (let i = 0; i < users.length; i++) {
+      delete allUsers[i]._id;
+      delete allUsers[i].__v;
+      delete allUsers[i].tweets;
+      assert.deepEqual(allUsers[i], users[i]);
     }
   });
 
-  test('get all users empty', function () {
-    const allUsers = donationService.getUsers();
-    assert.equal(allUsers.length, 0);
-  });
-
-  /*
-  test('get users', function () {
-    const url = 'http://localhost:4000/api/users';
-    let res = request('GET', url);
-    const users = JSON.parse(res.getBody('utf8'));
-    assert.equal(3, users.length);
-
-    assert.equal(users[0].firstName, 'Homer');
-    assert.equal(users[0].lastName, 'Simpson');
-    assert.equal(users[0].email, 'homer@simpson.com');
-    assert.equal(users[0].password, 'secret');
-
-    assert.equal(users[1].firstName, 'Marge');
-    assert.equal(users[1].lastName, 'Simpson');
-    assert.equal(users[1].email, 'marge@simpson.com');
-    assert.equal(users[1].password, 'secret');
-
-    assert.equal(users[2].firstName, 'Bart');
-    assert.equal(users[2].lastName, 'Simpson');
-    assert.equal(users[2].email, 'bart@simpson.com');
-    assert.equal(users[2].password, 'secret');
-  });
-
-  test('get one user', function () {
-    const allUsersUrl = 'http://localhost:4000/api/users';
-    let res = request('GET', allUsersUrl);
-    const users = JSON.parse(res.getBody('utf8'));
-
-    const oneUserUrl = allUsersUrl + '/' + users[0]._id;
-    res = request('GET', oneUserUrl);
-    const oneUser = JSON.parse(res.getBody('utf8'));
-
-    assert.equal(oneUser.firstName, 'Homer');
-    assert.equal(oneUser.lastName, 'Simpson');
-    assert.equal(oneUser.email, 'homer@simpson.com');
-    assert.equal(oneUser.password, 'secret');
-
-  });
-
-  test('delete a user', function () {
-    const allUsersUrl = 'http://localhost:4000/api/users';
-    let res = request('GET', allUsersUrl);
-    let oldUsers = JSON.parse(res.getBody('utf8'));
-
-    function randomIndex() {
-      return Math.floor(Math.random() * oldUsers.length);
-    }
-
-    let index = randomIndex();
-    const oneUserUrl = allUsersUrl + '/' + oldUsers[index]._id;
-
-    request('DELETE', oneUserUrl);
-    res = request('GET', allUsersUrl);
-    const newUsers = JSON.parse(res.getBody('utf8'));
-
-    oldUsers.splice(index, 1);
-    assert.deepEqual(newUsers, oldUsers);
-  });
-
-  test('delete all users', function () {
-    const allUsersUrl = 'http://localhost:4000/api/users';
-    request('DELETE', allUsersUrl);
-    const res = request('GET', allUsersUrl);
-    const newUsers = JSON.parse(res.getBody('utf8'));
-    assert.deepEqual(newUsers, []);
-  });
-  */
-
+  // test('get all users empty', function () {
+  //   const allUsers = tweetService.getUsers();
+  //   assert.equal(allUsers.length, 0);
+  // });
 });

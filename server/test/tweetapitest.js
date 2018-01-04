@@ -1,87 +1,93 @@
 'use strict';
 
 const assert = require('chai').assert;
-const request = require('sync-request');
+const TweetService = require('./tweet-service');
+const fixtures = require('./fixtures.json');
+const _ = require('lodash');
 
 suite('Tweet API tests', function () {
 
-  test('get tweets', function () {
-    const url = 'http://localhost:4000/api/tweets';
-    let res = request('GET', url);
-    const tweets = JSON.parse(res.getBody('utf8'));
-    assert.equal(3, tweets.length);
+  let users = fixtures.users;
+  let tweets = fixtures.tweets;
+  let newTweet = fixtures.tweets[0];
 
-    assert.equal(tweets[0].text, 'my first tweet');
-    //assert.typeof(tweets[0].date, 'date');
-    assert.isNotNull(tweets[0].author);
+  const tweetService = new TweetService(fixtures.tweetService);
 
-    assert.equal(tweets[1].text, 'my second tweet');
-    assert.typeof(tweets[1].date, 'date');
-    assert.isNotNull(tweets[1].author);
+  function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+  }
 
-    assert.equal(tweets[2].text, 'my third tweet');
-    assert.typeof(tweets[2].date, 'date');
-    assert.isNotNull(tweets[2].author);
+  beforeEach(function () {
+    tweetService.login(users[0]);
+    tweetService.deleteAllTweets();
+  });
+
+  afterEach(function () {
+    tweetService.deleteAllTweets();
+    tweetService.logout();
   });
 
   test('get one tweet', function () {
-    const allTweetsUrl = 'http://localhost:4000/api/tweets';
-    let res = request('GET', allTweetsUrl);
-    const tweets = JSON.parse(res.getBody('utf8'));
+    for (let i = 0; i < tweets.length; i++) {
+      tweetService.newTweet(tweets[i]);
+    }
 
-    const oneTweetUrl = allTweetsUrl + '/' + tweets[0]._id;
-    res = request('GET', oneTweetUrl);
-    const oneTweet = JSON.parse(res.getBody('utf8'));
-
-    assert.equal(oneTweet.firstName, 'Homer');
-    assert.equal(oneTweet.lastName, 'Simpson');
-    assert.equal(oneTweet.email, 'homer@simpson.com');
-    assert.equal(oneTweet.password, 'secret');
-
+    const returnedTweets = tweetService.getTweets();
+    const i = getRndInteger(0, tweets.length);
+    const randomTweet = returnedTweets[i];
+    const returnedTweet = tweetService.getTweet(randomTweet._id);
+    delete returnedTweet._id;
+    delete returnedTweet.__v;
+    assert.deepEqual(tweets[i], returnedTweet);
   });
 
   test('create a tweet', function () {
-    const tweetsUrl = 'http://localhost:4000/api/tweets';
-    const newTweet = {
-      firstName: 'Maggie',
-      lastName: 'Simpson',
-      email: 'maggie@simpson.com',
-      password: 'secret',
-    };
-    const res = request('POST', tweetsUrl, { json: newTweet });
-    const returnedTweet = JSON.parse(res.getBody('utf8'));
-
-    assert.equal(returnedTweet.firstName, 'Maggie');
-    assert.equal(returnedTweet.lastName, 'Simpson');
-    assert.equal(returnedTweet.email, 'maggie@simpson.com');
-    assert.equal(returnedTweet.password, 'secret');
+    tweetService.newTweet(newTweet);
+    const returnedTweets = tweetService.getTweets();
+    assert.equal(returnedTweets.length, 1);
+    assert.isDefined(returnedTweets[0].author);
+    delete returnedTweets[0]._id;
+    delete returnedTweets[0].__v;
+    delete returnedTweets[0].author;
+    assert.deepEqual(newTweet, returnedTweets[0]);
   });
 
-  test('delete a tweet', function () {
-    const allTweetsUrl = 'http://localhost:4000/api/tweets';
-    let res = request('GET', allTweetsUrl);
-    let oldTweets = JSON.parse(res.getBody('utf8'));
-
-    function randomIndex() {
-      return Math.floor(Math.random() * oldTweets.length);
+  test('create multiple tweets', function () {
+    for (let i = 0; i < tweets.length; i++) {
+      tweetService.newTweet(tweets[i]);
     }
 
-    let index = randomIndex();
-    const oneTweetUrl = allTweetsUrl + '/' + oldTweets[index]._id;
-
-    request('DELETE', oneTweetUrl);
-    res = request('GET', allTweetsUrl);
-    const newTweets = JSON.parse(res.getBody('utf8'));
-
-    oldTweets.splice(index, 1);
-    assert.deepEqual(newTweets, oldTweets);
+    const returnedTweets = tweetService.getTweets();
+    assert.equal(returnedTweets.length, tweets.length);
+    for (let i = 0; i < tweets.length; i++) {
+      delete returnedTweets[i]._id;
+      delete returnedTweets[i].__v;
+      assert.deepEqual(tweets[i], returnedTweets[i]);
+    }
   });
 
   test('delete all tweets', function () {
-    const allTweetsUrl = 'http://localhost:4000/api/tweets';
-    request('DELETE', allTweetsUrl);
-    const res = request('GET', allTweetsUrl);
-    const newTweets = JSON.parse(res.getBody('utf8'));
-    assert.deepEqual(newTweets, []);
+    for (let i = 0; i < tweets.length; i++) {
+      tweetService.newTweet(tweets[i]);
+    }
+
+    const d1 = tweetService.getTweets();
+    assert.equal(d1.length, tweets.length);
+    tweetService.deleteAllTweets();
+    const d2 = tweetService.getTweets();
+    assert.equal(d2.length, 0);
   });
+
+  test('delete one tweet', function () {
+    const tweetCount = tweets.length;
+    for (let i = 0; i < tweets.length; i++) {
+      tweetService.newTweet(tweets[i]);
+    }
+
+    const returnedTweets = tweetService.getTweets();
+    const randomTweet = returnedTweets[getRndInteger(0, tweets.length)];
+    tweetService.deleteOneTweet(randomTweet._id);
+    assert.equal(returnedTweets.length, tweetCount - 1);
+  });
+
 });

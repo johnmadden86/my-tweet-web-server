@@ -2,9 +2,12 @@
 
 const User = require('../models/user');
 const Boom = require('boom');
+const utils = require('./utils');
 
 exports.findAll = {
-  auth: false,
+  auth: {
+    strategy: 'jwt',
+  },
   handler: function (request, reply) {
     User.find({}).exec()
         .then(users => {
@@ -16,7 +19,9 @@ exports.findAll = {
 };
 
 exports.findOne = {
-  auth: false,
+  auth: {
+    strategy: 'jwt',
+  },
   handler: function (request, reply) {
     User.findOne({ _id: request.params.id })
         .then(user => {
@@ -42,7 +47,9 @@ exports.create = {
 };
 
 exports.deleteAll = {
-  auth: false,
+  auth: {
+    strategy: 'jwt',
+  },
   handler: function (request, reply) {
     User.remove({})
         .then(err => {
@@ -54,7 +61,9 @@ exports.deleteAll = {
 };
 
 exports.deleteOne = {
-  auth: false,
+  auth: {
+    strategy: 'jwt',
+  },
   handler: function (request, reply) {
     User.remove({ _id: request.params.id }).then(user => {
       reply(user).code(204);
@@ -83,9 +92,10 @@ exports.authenticate = {
               message: 'Authentication failed. User not found.',
             }).code(201);
           }
-        }).catch(err => {
-      reply(Boom.notFound('internal db failure'));
-    });
+        })
+        .catch(err => {
+          reply(Boom.notFound('internal db failure'));
+        });
   },
 
 };
