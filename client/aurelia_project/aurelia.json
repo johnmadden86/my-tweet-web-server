@@ -119,8 +119,8 @@
     "source": "src/**/*.js"
   },
   "markupProcessor": {
-    "id": "minimum",
-    "displayName": "Minimal Minification",
+    "id": "none",
+    "displayName": "None",
     "fileExtension": ".html",
     "source": "src/**/*.html"
   },
@@ -131,8 +131,8 @@
     "source": "src/**/*.css"
   },
   "editor": {
-    "id": "vscode",
-    "displayName": "Visual Studio Code"
+    "id": "webstorm",
+    "displayName": "WebStorm"
   },
   "unitTestRunner": {
     "id": "karma",

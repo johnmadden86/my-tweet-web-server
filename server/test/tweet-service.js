@@ -23,6 +23,10 @@ class TweetService {
     return this.httpService.post('/api/users', newUser);
   }
 
+  createAdmin(newUser) {
+    return this.httpService.post('/api/users/admin', newUser);
+  }
+
   getUser(id) {
     return this.httpService.get('/api/users/' + id);
   }
@@ -31,12 +35,24 @@ class TweetService {
     return this.httpService.get('/api/users');
   }
 
+  getAdmins() {
+    return this.httpService.get('/api/users/admin');
+  }
+
+  getNonAdmin() {
+    return this.httpService.get('/api/users/~');
+  }
+
   deleteOneUser(id) {
     return this.httpService.delete('/api/users/' + id);
   }
 
   deleteAllUsers() {
     return this.httpService.delete('/api/users');
+  }
+
+  updateUserDetails(id, details) {
+    return this.httpService.post('/api/users/' + id, details);
   }
 
   newTweet(newTweet) {
@@ -57,6 +73,14 @@ class TweetService {
 
   deleteAllTweets() {
     return this.httpService.delete('/api/tweets');
+  }
+
+  follow(id, followId) {
+    return this.httpService.get('/api/users/' + id + '/follow?_id=' + followId);
+  }
+
+  unfollow(id, followId) {
+    return this.httpService.get('/api/users/' + id + '/unfollow?_id=' + followId);
   }
 }
 

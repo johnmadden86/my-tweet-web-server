@@ -9,31 +9,70 @@ const uuid = require('uuid');
 suite('User API tests', function () {
 
   let users = fixtures.users;
-  let newUser = fixtures.newUser;
 
   const tweetService = new TweetService(fixtures.tweetService);
 
   beforeEach(function () {
     tweetService.login(users[0]);
-
-    //tweetService.deleteAllUsers();
   });
 
   afterEach(function () {
-    //tweetService.deleteAllUsers();
     tweetService.logout();
   });
 
   test('create a user', function () {
-    const returnedUser = tweetService.createUser(newUser);
-    assert(_.some([returnedUser], newUser), 'returnedUser must be a superset of newUser');
+    let returnedUser = tweetService.createUser(users[2]);
+    assert(_.some([returnedUser], users[2]), 'returnedUser must be a superset of newUser');
     assert.isDefined(returnedUser._id);
+    assert.isFalse(returnedUser.admin);
+    returnedUser = tweetService.createAdmin(users[3]);
+    assert(_.some([returnedUser], users[3]), 'returnedUser must be a superset of newUser');
+    assert.isDefined(returnedUser._id);
+    assert.isTrue(returnedUser.admin);
   });
 
-  test('get user', function () {
-    const u1 = tweetService.createUser(newUser);
-    const u2 = tweetService.getUser(u1._id);
-    assert.deepEqual(u1, u2);
+  test('get one user', function () {
+    const user1 = tweetService.createUser(users[4]);
+    const user2 = tweetService.getUser(user1._id);
+    assert.deepEqual(user1, user2);
+  });
+
+  test('get all users', function () {
+    const allUsers = tweetService.getUsers();
+    const array = [];
+    for (let i = 0; i < allUsers.length; i++) {
+      const user = tweetService.getUser(allUsers[i]._id);
+      array.push(user);
+    }
+
+    assert.deepEqual(allUsers, array);
+  });
+
+  test('get all admin users', function () {
+    const allUsers = tweetService.getUsers();
+    const allAdmins = tweetService.getAdmins();
+    const array = [];
+    for (let i = 0; i < allUsers.length; i++) {
+      if (allUsers[i].admin === true) {
+        array.push(allUsers[i]);
+      }
+    }
+
+    assert.deepEqual(allAdmins, array);
+  });
+
+  test('get all non-admin users', function () {
+    const allUsers = tweetService.getUsers();
+    const allNonAdmins = tweetService.getNonAdmin();
+    const array = [];
+    for (let i = 0; i < allUsers.length; i++) {
+      const user = tweetService.getUser(allUsers[i]._id);
+      if (user.admin === false) {
+        array.push(user);
+      }
+    }
+
+    assert.deepEqual(allNonAdmins, array);
   });
 
   test('get invalid user', function () {
@@ -41,40 +80,62 @@ suite('User API tests', function () {
     assert.isNull(u1);
   });
 
-  test('delete a user', function () {
-    const u = tweetService.createUser(newUser);
-    const returnedUsers = tweetService.getUsers();
-    const userId = returnedUsers[0]._id;
-    assert(tweetService.getUser(userId) != null);
+  test('update details', function () {
+    const details = {
+      firstName: 'Ned',
+      lastName: 'Flanders',
+      email: 'ned@flanders.com',
+      password: 'password',
+    };
+
+    const userId = tweetService.getUsers()[0]._id;
+    tweetService.updateUserDetails(userId, details);
+    const user = tweetService.getUser(userId);
+    assert.equal(user.firstName, details.firstName);
+    assert.equal(user.lastName, details.lastName);
+    assert.equal(user.email, details.email);
+    assert.equal(user.password, details.password);
+
+  });
+
+  test('follow new user', function () {
+    const currentUserId = tweetService.getUsers()[0]._id;
+    console.log('currentUserId ' + currentUserId);
+    const userIdToFollow = tweetService.getUsers()[1]._id;
+    console.log('userIdToFollow ' + userIdToFollow);
+    tweetService.follow(currentUserId, userIdToFollow);
+    assert.notEqual(tweetService.getUser(currentUserId).following.indexOf(userIdToFollow), -1);
+  });
+
+  test('unfollow user', function () {
+    const currentUserId = tweetService.getUsers()[0]._id;
+    console.log('currentUserId ' + currentUserId);
+    const userIdToUnfollow = tweetService.getUsers()[1]._id;
+    console.log('userIdToFollow ' + userIdToUnfollow);
+    tweetService.unfollow(currentUserId, userIdToUnfollow);
+    assert.equal(tweetService.getUser(currentUserId).following.indexOf(userIdToUnfollow), -1);
+  });
+
+  /*
+  test('delete one user', function () {
+    tweetService.createUser(users[4]);
+    let returnedUsers = tweetService.getUsers();
+    const oldSize = returnedUsers.length;
+    const userId = returnedUsers[4]._id;
+    assert.isNotNull(tweetService.getUser(userId));
     tweetService.deleteOneUser(userId);
-    assert(tweetService.getUser(userId) == null);
+    assert.isNull(tweetService.getUser(userId.toString));
+    returnedUsers = tweetService.getUsers();
+    const newSize = returnedUsers.length;
+    assert.equal(oldSize - newSize, 1);
   });
 
-  // test('get all users', function () {
-  //   for (let u of users) {
-  //     tweetService.createUser(u);
-  //   }
-  //
-  //   const allUsers = tweetService.getUsers();
-  //   assert.equal(allUsers.length, users.length);
-  // });
-
-  test('get users detail', function () {
-    for (let i = 0; i < users.length; i++) {
-      tweetService.createUser(users[i]);
-    }
-
-    const allUsers = tweetService.getUsers();
-    for (let i = 0; i < users.length; i++) {
-      delete allUsers[i]._id;
-      delete allUsers[i].__v;
-      delete allUsers[i].tweets;
-      assert.deepEqual(allUsers[i], users[i]);
-    }
+  test('delete all (non-admin) users', function () {
+    // NB deleting all users would invalidate authentication
+    // and require an unauthenticated route to view changes.
+    // This has been omitted.
+    tweetService.deleteAllUsers();
+    assert.isNull(tweetService.getNonAdmin());
   });
-
-  // test('get all users empty', function () {
-  //   const allUsers = tweetService.getUsers();
-  //   assert.equal(allUsers.length, 0);
-  // });
+  */
 });

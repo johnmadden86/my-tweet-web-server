@@ -9,10 +9,10 @@ const userSchema = mongoose.Schema({
   email: String,
   password: String,
   admin: Boolean,
-  tweets: [
+  following: [
     {
-      text: String,
-      date: Date,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     },
   ],
 });

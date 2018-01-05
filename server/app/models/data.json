@@ -12,20 +12,6 @@
       "firstName": "Marge",
       "lastName": "Simpson",
       "email": "marge@simpson.com",
-      "password": "secret",
-      "admin": false
-    },
-    "admin": {
-      "firstName": "Super",
-      "lastName": "User",
-      "email": "super@user.com",
-      "password": "superuser",
-      "admin": true
-    },
-    "bart": {
-      "firstName": "Bart",
-      "lastName": "Simpson",
-      "email": "bart@simpson.com",
       "password": "special",
       "admin": true
     }
