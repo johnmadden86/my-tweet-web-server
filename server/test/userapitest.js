@@ -116,7 +116,6 @@ suite('User API tests', function () {
     assert.equal(tweetService.getUser(currentUserId).following.indexOf(userIdToUnfollow), -1);
   });
 
-  /*
   test('delete one user', function () {
     tweetService.createUser(users[4]);
     let returnedUsers = tweetService.getUsers();
@@ -137,5 +136,4 @@ suite('User API tests', function () {
     tweetService.deleteAllUsers();
     assert.isNull(tweetService.getNonAdmin());
   });
-  */
 });

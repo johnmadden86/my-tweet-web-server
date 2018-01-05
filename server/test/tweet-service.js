@@ -82,6 +82,14 @@ class TweetService {
   unfollow(id, followId) {
     return this.httpService.get('/api/users/' + id + '/unfollow?_id=' + followId);
   }
+
+  getAllTweetsForUser(userId) {
+    return this.httpService.get('/api/users/' + userId + '/tweets');
+  }
+
+  getTimeline(userId) {
+    return this.httpService.get('/api/users/' + userId + '/timeline');
+  }
 }
 
 module.exports = TweetService;

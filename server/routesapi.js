@@ -23,9 +23,11 @@ module.exports = [
 
   { method: 'GET', path: '/api/tweets/{id}', config: TweetsApi.findOne },
   { method: 'GET', path: '/api/tweets', config: TweetsApi.findAll },
-  // TODO { method: 'GET', path: '/api/tweets', config: TweetsApi.findAllForUser },
+  { method: 'GET', path: '/api/users/{id}/tweets', config: TweetsApi.findAllForUser },
+  { method: 'GET', path: '/api/users/{id}/timeline', config: TweetsApi.findAllByFollowing },
+
   // TODO { method: 'GET', path: '/api/tweets', config: TweetsApi.findAllBySearchString },
-  // TODO { method: 'GET', path: '/api/tweets', config: TweetsApi.findAllByFollowing },
+
 
   { method: 'DELETE', path: '/api/tweets/{id}', config: TweetsApi.deleteOne },
   { method: 'DELETE', path: '/api/tweets', config: TweetsApi.deleteAll },

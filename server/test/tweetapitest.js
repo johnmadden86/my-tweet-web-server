@@ -23,11 +23,24 @@ suite('Tweet API tests', function () {
   });
 
   afterEach(function () {
-    tweetService.deleteAllTweets();
+    // tweetService.deleteAllTweets();
     tweetService.logout();
   });
 
-  test('get one tweet', function () {
+  test('create a tweet', function () {
+    let returnedTweets = tweetService.getTweets();
+    const oldLength = returnedTweets.length;
+    tweetService.newTweet(newTweet);
+    returnedTweets = tweetService.getTweets();
+    const newLength = returnedTweets.length;
+    assert.equal(newLength - oldLength, 1);
+    assert.isDefined(returnedTweets[0]._id);
+    assert.isDefined(returnedTweets[0].date);
+    assert.isDefined(returnedTweets[0].author);
+    assert.deepEqual(newTweet.text, returnedTweets[0].text);
+  });
+
+  test('get one tweet (by id), get all tweets', function () {
     for (let i = 0; i < tweets.length; i++) {
       tweetService.newTweet(tweets[i]);
     }
@@ -36,58 +49,94 @@ suite('Tweet API tests', function () {
     const i = getRndInteger(0, tweets.length);
     const randomTweet = returnedTweets[i];
     const returnedTweet = tweetService.getTweet(randomTweet._id);
-    delete returnedTweet._id;
-    delete returnedTweet.__v;
-    assert.deepEqual(tweets[i], returnedTweet);
-  });
+    assert.isDefined(returnedTweet._id);
+    assert.isDefined(returnedTweet.date);
+    assert.isDefined(returnedTweet.author);
+    assert.deepEqual(returnedTweet.text, tweets[i].text);
 
-  test('create a tweet', function () {
-    tweetService.newTweet(newTweet);
-    const returnedTweets = tweetService.getTweets();
-    assert.equal(returnedTweets.length, 1);
-    assert.isDefined(returnedTweets[0].author);
-    delete returnedTweets[0]._id;
-    delete returnedTweets[0].__v;
-    delete returnedTweets[0].author;
-    assert.deepEqual(newTweet, returnedTweets[0]);
-  });
+    // get all tweets
 
-  test('create multiple tweets', function () {
-    for (let i = 0; i < tweets.length; i++) {
-      tweetService.newTweet(tweets[i]);
-    }
-
-    const returnedTweets = tweetService.getTweets();
     assert.equal(returnedTweets.length, tweets.length);
-    for (let i = 0; i < tweets.length; i++) {
-      delete returnedTweets[i]._id;
-      delete returnedTweets[i].__v;
-      assert.deepEqual(tweets[i], returnedTweets[i]);
-    }
   });
 
-  test('delete all tweets', function () {
-    for (let i = 0; i < tweets.length; i++) {
-      tweetService.newTweet(tweets[i]);
-    }
-
-    const d1 = tweetService.getTweets();
-    assert.equal(d1.length, tweets.length);
-    tweetService.deleteAllTweets();
-    const d2 = tweetService.getTweets();
-    assert.equal(d2.length, 0);
-  });
-
-  test('delete one tweet', function () {
+  test('delete one tweet, all tweets', function () {
     const tweetCount = tweets.length;
     for (let i = 0; i < tweets.length; i++) {
       tweetService.newTweet(tweets[i]);
     }
 
-    const returnedTweets = tweetService.getTweets();
-    const randomTweet = returnedTweets[getRndInteger(0, tweets.length)];
-    tweetService.deleteOneTweet(randomTweet._id);
+    let returnedTweets = tweetService.getTweets();
+    const randomTweetId = returnedTweets[getRndInteger(0, tweets.length)]._id;
+    tweetService.deleteOneTweet(randomTweetId);
+    returnedTweets = tweetService.getTweets();
+    assert.isNull(tweetService.getTweet(randomTweetId.toString));
     assert.equal(returnedTweets.length, tweetCount - 1);
+
+    returnedTweets = tweetService.getTweets();
+    assert.isAbove(returnedTweets.length, 0);
+    tweetService.deleteAllTweets();
+    returnedTweets = tweetService.getTweets();
+    assert.equal(returnedTweets.length, 0);
   });
 
+  test('get all tweets for user', function () {
+    const allUsers = tweetService.getUsers();
+    console.log(allUsers.length);
+    tweetService.logout();
+    allUsers.forEach(function (user) {
+      tweets.forEach(function (tweet) {
+        const newTweet = {
+          text: tweet.text + ' ' + user.firstName,
+        };
+        tweetService.login(user);
+        tweetService.newTweet(newTweet);
+        tweetService.logout();
+      });
+    });
+
+    tweetService.login(allUsers[0]);
+    const rndUser = allUsers[getRndInteger(0, allUsers.length)];
+    const allTweetsForUser = tweetService.getAllTweetsForUser(rndUser._id);
+    const rndTweet = allTweetsForUser[getRndInteger(0, allTweetsForUser.length)];
+    assert.equal(rndTweet.author, rndUser._id);
+    assert.include(rndTweet.text, rndUser.firstName);
+    assert.equal(allTweetsForUser.length, tweets.length);
+  });
+
+  test('get all tweets by follows (timeline', function () {
+    let allUsers = tweetService.getUsers();
+    tweetService.deleteAllUsers();
+    for (let i = 0; i < users.length; i++) {
+      tweetService.createUser(users[i]);
+    }
+
+    tweetService.login(allUsers[0]);
+    allUsers = tweetService.getUsers();
+    tweetService.logout();
+    allUsers.forEach(function (user) {
+      tweets.forEach(function (tweet) {
+        const newTweet = {
+          text: tweet.text + ' ' + user.firstName,
+        };
+        tweetService.login(user);
+        tweetService.newTweet(newTweet);
+        tweetService.logout();
+      });
+    });
+
+    tweetService.login(allUsers[0]);
+    let array = [];
+    for (let i = 1; i < allUsers.length; i++) {
+      tweetService.follow(allUsers[0]._id, allUsers[i]._id);
+      array.concat(tweetService.getAllTweetsForUser(allUsers[i]._id));
+    }
+
+    const timeline = tweetService.getTimeline(allUsers[0]._id);
+
+    array.sort(function (a, b) {
+      return b.date - a.date;
+    });
+
+    assert.deepEqual(array, timeline);
+  });
 });

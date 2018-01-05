@@ -176,9 +176,7 @@ exports.follow = {
   },
   handler: function (request, reply) {
     const userIdToFollow = request.url.query._id;
-    console.log('userToFollow ' + userIdToFollow);
     const currentUserId = request.params.id;
-    console.log(currentUserId);
     User.findOne({ _id: currentUserId })
         .then(user => {
           const index = user.following.indexOf(userIdToFollow);
@@ -190,7 +188,7 @@ exports.follow = {
           user.save()
             .then(user => {
               reply(user).code(201);
-            })
+            }) // TODO add followed by
             .catch(err => {
               reply(Boom.badImplementation('error following user'));
             });
@@ -208,9 +206,7 @@ exports.unfollow = {
   },
   handler: function (request, reply) {
     const userIdToUnfollow = request.url.query._id;
-    console.log('userToFollow ' + userIdToUnfollow);
     const currentUserId = request.params.id;
-    console.log(currentUserId);
     User.findOne({ _id: currentUserId })
         .then(user => {
           const index = user.following.indexOf(userIdToUnfollow);
@@ -222,7 +218,7 @@ exports.unfollow = {
           user.save()
             .then(user => {
               reply(user).code(201);
-            })
+            }) // TODO add followed by
             .catch(err => {
               reply(Boom.badImplementation('error following user'));
             });
