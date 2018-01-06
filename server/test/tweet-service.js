@@ -87,6 +87,10 @@ class TweetService {
     return this.httpService.get('/api/users/' + userId + '/tweets');
   }
 
+  deleteAllTweetsForUser(userId) {
+    return this.httpService.delete('/api/users/' + userId + '/tweets');
+  }
+
   getTimeline(userId) {
     return this.httpService.get('/api/users/' + userId + '/timeline');
   }

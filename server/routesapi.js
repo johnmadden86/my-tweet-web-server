@@ -28,10 +28,10 @@ module.exports = [
 
   // TODO { method: 'GET', path: '/api/tweets', config: TweetsApi.findAllBySearchString },
 
-
   { method: 'DELETE', path: '/api/tweets/{id}', config: TweetsApi.deleteOne },
   { method: 'DELETE', path: '/api/tweets', config: TweetsApi.deleteAll },
-  // TODO { method: 'DELETE', path: '/api/tweets', config: TweetsApi.deleteAllForUser },
+  { method: 'DELETE', path: '/api/users/{id}/tweets', config: TweetsApi.deleteAllForUser },
+
   // TODO { method: 'DELETE', path: '/api/tweets', config: TweetsApi.deleteAllBySearchString },
 ];
 

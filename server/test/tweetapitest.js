@@ -81,7 +81,6 @@ suite('Tweet API tests', function () {
 
   test('get all tweets for user', function () {
     const allUsers = tweetService.getUsers();
-    console.log(allUsers.length);
     tweetService.logout();
     allUsers.forEach(function (user) {
       tweets.forEach(function (tweet) {
@@ -96,11 +95,15 @@ suite('Tweet API tests', function () {
 
     tweetService.login(allUsers[0]);
     const rndUser = allUsers[getRndInteger(0, allUsers.length)];
-    const allTweetsForUser = tweetService.getAllTweetsForUser(rndUser._id);
+    let allTweetsForUser = tweetService.getAllTweetsForUser(rndUser._id);
     const rndTweet = allTweetsForUser[getRndInteger(0, allTweetsForUser.length)];
     assert.equal(rndTweet.author, rndUser._id);
     assert.include(rndTweet.text, rndUser.firstName);
     assert.equal(allTweetsForUser.length, tweets.length);
+
+    tweetService.deleteAllTweetsForUser(rndUser._id);
+    allTweetsForUser = tweetService.getAllTweetsForUser(rndUser._id);
+    assert.equal(allTweetsForUser.length, 0);
   });
 
   test('get all tweets by follows (timeline', function () {
@@ -128,15 +131,15 @@ suite('Tweet API tests', function () {
     let array = [];
     for (let i = 1; i < allUsers.length; i++) {
       tweetService.follow(allUsers[0]._id, allUsers[i]._id);
-      array.concat(tweetService.getAllTweetsForUser(allUsers[i]._id));
+      array = array.concat(tweetService.getAllTweetsForUser(allUsers[i]._id));
     }
 
     const timeline = tweetService.getTimeline(allUsers[0]._id);
 
     array.sort(function (a, b) {
-      return b.date - a.date;
+      return new Date(b.date) - new Date(a.date);
     });
 
-    assert.deepEqual(array, timeline);
+    assert.deepEqual(timeline, array);
   });
 });

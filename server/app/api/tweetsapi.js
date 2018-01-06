@@ -11,10 +11,10 @@ exports.findAll = {
   },
   handler: function (request, reply) {
     Tweet.find({})
-        .exec()
+        .sort({ date: -1 }) //reverse chron sort
         .then(tweets => {
-      reply(tweets);
-    }).catch(err => {
+          reply(tweets);
+        }).catch(err => {
       reply(Boom.badImplementation('error accessing db'));
     });
   },
@@ -27,11 +27,11 @@ exports.findOne = {
   handler: function (request, reply) {
     Tweet.findOne({ _id: request.params.id })
         .then(tweet => {
-      reply(tweet);
-    })
+          reply(tweet);
+        })
         .catch(err => {
-      reply(Boom.notFound('id not found'));
-    });
+          reply(Boom.notFound('id not found'));
+        });
   },
 };
 
@@ -59,11 +59,13 @@ exports.deleteAll = {
     strategy: 'jwt',
   },
   handler: function (request, reply) {
-    Tweet.remove({}).then(err => {
-      reply().code(204);
-    }).catch(err => {
-      reply(Boom.badImplementation('error removing tweets'));
-    });
+    Tweet.remove({})
+        .then(err => {
+          reply().code(204);
+        })
+        .catch(err => {
+          reply(Boom.badImplementation('error removing tweets'));
+        });
   },
 };
 
@@ -72,11 +74,13 @@ exports.deleteOne = {
     strategy: 'jwt',
   },
   handler: function (request, reply) {
-    Tweet.remove({ _id: request.params.id }).then(tweet => {
-      reply(tweet).code(204);
-    }).catch(err => {
-      reply(Boom.notFound('id not found'));
-    });
+    Tweet.remove({ _id: request.params.id })
+        .then(tweet => {
+          reply(tweet).code(204);
+        })
+        .catch(err => {
+          reply(Boom.notFound('id not found'));
+        });
   },
 };
 
@@ -86,9 +90,24 @@ exports.findAllForUser = {
   },
   handler: function (request, reply) {
     Tweet.find({ author: request.params.id })
-        .exec()
+        .sort({ date: -1 }) //reverse chron sort
         .then(tweets => {
           reply(tweets);
+        })
+        .catch(err => {
+          reply(Boom.notFound('id not found'));
+        });
+  },
+};
+
+exports.deleteAllForUser = {
+  auth: {
+    strategy: 'jwt',
+  },
+  handler: function (request, reply) {
+    Tweet.remove({ author: request.params.id })
+        .then(tweets => {
+          reply(tweets).code(204);
         })
         .catch(err => {
           reply(Boom.notFound('id not found'));
@@ -103,28 +122,18 @@ exports.findAllByFollowing = {
   handler: function (request, reply) {
     User.find({ _id: request.params.id })
         .then(user => {
-          const timeline = [];
-          user[0].following.forEach(author => {
-            Tweet.find({ author: author })
-                .exec()
-                .then(tweets => {
-                  tweets.forEach(function (tweet) {
-                    timeline.push(tweet);
-                  });
-
-                  timeline.sort(function (a, b) {
-                    return b.date - a.date;
-                  });
-
-                  reply(timeline);
-                })
-                .catch(err => {
-                  reply(Boom.notFound('author not found'));
-                });
-          });
+          const following = user[0].following;
+          Tweet.find({ author: following })
+              .sort({ date: -1 }) //reverse chron sort
+              .then(tweets => {
+                reply(tweets);
+              })
+              .catch(err => {
+                reply(Boom.notFound('tweets not found'));
+              });
         })
         .catch(err => {
-          reply(Boom.notFound('id not found'));
+          reply(Boom.notFound('user not found'));
         });
   },
 };

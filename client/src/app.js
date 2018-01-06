@@ -23,7 +23,7 @@ export class App {
   attached() {
     if (this.ts.isAuthenticated()) {
       this.au.setRoot('home').then(() => {
-        this.router.navigateToRoute('dashboard');
+        this.router.navigateToRoute('new-tweet');
       });
     }
   }

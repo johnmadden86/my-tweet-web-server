@@ -182,6 +182,7 @@ exports.follow = {
           const index = user.following.indexOf(userIdToFollow);
           if (index === -1) {
             // prevent duplication
+            // TODO sanitise followId
             user.following.push(userIdToFollow);
           }
 
