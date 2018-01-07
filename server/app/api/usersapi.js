@@ -13,10 +13,10 @@ exports.authenticate = {
     const user = request.payload;
     User.findOne({ email: user.email })
         .then(foundUser => {
-          console.log(foundUser);
           bcrypt.compare(user.password, foundUser.password, (err, isValid) => {
             if (isValid) {
               const token = utils.createToken(foundUser);
+              console.log('User authenticated: ' + foundUser.firstName + ' ' + foundUser.lastName);
               reply({
                 success: true,
                 token: token,

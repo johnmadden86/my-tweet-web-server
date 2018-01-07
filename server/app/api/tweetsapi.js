@@ -12,6 +12,7 @@ exports.findAll = {
   handler: function (request, reply) {
     Tweet.find({})
         .sort({ date: -1 }) //reverse chron sort
+        .populate('author')
         .then(tweets => {
           reply(tweets);
         }).catch(err => {
@@ -26,6 +27,7 @@ exports.findOne = {
   },
   handler: function (request, reply) {
     Tweet.findOne({ _id: request.params.id })
+        .populate('author')
         .then(tweet => {
           reply(tweet);
         })
@@ -43,11 +45,11 @@ exports.newTweet = {
     const tweet = new Tweet(request.payload);
     tweet.date = new Date();
     tweet.author = utils.getUserIdFromRequest(request);
+    console.log(tweet);
     tweet.save()
         .then(newTweet => {
           reply(newTweet).code(201);
-          return Tweet.findOne(newTweet)
-              .populate('author');
+          return Tweet.findOne(newTweet).populate('author');
         }).catch(err => {
       reply(Boom.badImplementation('error creating tweet'));
     });
@@ -91,6 +93,7 @@ exports.findAllForUser = {
   handler: function (request, reply) {
     Tweet.find({ author: request.params.id })
         .sort({ date: -1 }) //reverse chron sort
+        .populate('author')
         .then(tweets => {
           reply(tweets);
         })
@@ -125,6 +128,7 @@ exports.findAllByFollowing = {
           const following = user[0].following;
           Tweet.find({ author: following })
               .sort({ date: -1 }) //reverse chron sort
+              //.populate('author')
               .then(tweets => {
                 reply(tweets);
               })

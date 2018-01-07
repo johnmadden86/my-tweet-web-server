@@ -3,8 +3,11 @@ const User = require('../models/user');
 const utils = require('./utils.js');
 const Boom = require('boom');
 
+const tokenPassword = 'secretpasswordnotrevealedtoanyone';
+
 exports.createToken = function (user) {
-  return jwt.sign({ id: user._id, email: user.email }, 'secretpasswordnotrevealedtoanyone', {
+  return jwt.sign(
+      { id: user._id, email: user.email }, tokenPassword, {
     algorithm: 'HS256',
     expiresIn: '1h',
   });
@@ -13,10 +16,12 @@ exports.createToken = function (user) {
 exports.decodeToken = function (token) {
   const userInfo = {};
   try {
-    const decoded = jwt.verify(token, 'secretpasswordnotrevealedtoanyone');
+    const decoded = jwt.verify(token, tokenPassword);
+    console.log('decoded:' + decoded);
     userInfo.userId = decoded.id;
     userInfo.email = decoded.email;
   } catch (e) {
+    console.log('error decoding token');
   }
 
   return userInfo;
@@ -39,10 +44,26 @@ exports.validate = function (decoded, request, callback) {
 exports.getUserIdFromRequest = function (request) {
   let userId = null;
   try {
-    const authorization = request.headers.authorization;
-    const token = authorization.split(' ')[1];
-    const decodedToken = jwt.verify(token, 'secretpasswordnotrevealedtoanyone');
-    userId = decodedToken.id;
+    const token = request.headers.authorization;
+    console.log('JSON web token: ' + token);
+    const tokenSplit = token.split('.');
+    const header = tokenSplit[0];
+    const payload = tokenSplit[1];
+    const signature = tokenSplit[2];
+    console.log('header: ' + header);
+    console.log('payload: ' + payload);
+    console.log('signature: ' + signature);
+    const decodedHeader = utils.decodeToken(header);
+    const decodedPayload = utils.decodeToken(payload);
+    const decodedSignature = utils.decodeToken(signature);
+    const decodedToken = utils.decodeToken(token);
+    console.log(decodedHeader);
+    console.log(decodedPayload);
+    console.log(decodedSignature);
+    console.log(decodedToken);
+
+    userId = decodedToken.userId;
+    console.log('userId ' + userId);
   } catch (e) {
     userId = null;
   }
