@@ -1,3 +1,3 @@
 export default class Fixtures {
-  baseUrl = 'http://localhost:4000';
+  baseUrl = 'https://lit-plains-67430.herokuapp.com';
 }

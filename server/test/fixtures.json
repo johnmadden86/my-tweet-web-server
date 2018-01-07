@@ -5,13 +5,13 @@
       "firstName": "Homer",
       "lastName": "Simpson",
       "email": "homer@simpson.com",
-      "password": "password"
+      "password": "secret"
     },
     {
       "firstName": "Marge",
       "lastName": "Simpson",
       "email": "marge@simpson.com",
-      "password": "special"
+      "password": "secret"
     },
     {
       "firstName": "Bart",
