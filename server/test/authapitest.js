@@ -8,7 +8,6 @@ const utils = require('../app/api/utils.js');
 suite('Candidate API tests', function () {
 
   let users = fixtures.users;
-  let newUser = fixtures.newUser;
 
   const tweetService = new TweetService(fixtures.tweetService);
 
@@ -16,7 +15,7 @@ suite('Candidate API tests', function () {
     let returnedTweets = tweetService.getTweets();
     assert.isNull(returnedTweets);
 
-    const response = tweetService.login(users[0]);
+    const response = tweetService.login(users[2]);
     returnedTweets = tweetService.getTweets();
     assert.isNotNull(returnedTweets);
 

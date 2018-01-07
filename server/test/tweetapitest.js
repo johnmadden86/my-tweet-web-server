@@ -9,112 +9,115 @@ suite('Tweet API tests', function () {
 
   let users = fixtures.users;
   let tweets = fixtures.tweets;
-  let newTweet = fixtures.tweets[0];
-
+  let newTweetData = fixtures.tweets[0];
+  let newTweet;
+  let allTweets;
   const tweetService = new TweetService(fixtures.tweetService);
+  tweetService.logout();
+  tweetService.delete();
+  const user1 = tweetService.createUser(users[0]);
+  const user2 = tweetService.createUser(users[1]);
+  tweetService.login(users[0]);
+  tweetService.deleteAllTweets();
 
   function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
   }
 
   beforeEach(function () {
-    tweetService.login(users[0]);
-    tweetService.deleteAllTweets();
   });
 
   afterEach(function () {
-    // tweetService.deleteAllTweets();
-    tweetService.logout();
   });
 
   test('create a tweet', function () {
     let returnedTweets = tweetService.getTweets();
     const oldLength = returnedTweets.length;
-    tweetService.newTweet(newTweet);
+    newTweet = tweetService.newTweet(newTweetData);
     returnedTweets = tweetService.getTweets();
     const newLength = returnedTweets.length;
     assert.equal(newLength - oldLength, 1);
-    assert.isDefined(returnedTweets[0]._id);
-    assert.isDefined(returnedTweets[0].date);
-    assert.isDefined(returnedTweets[0].author);
-    assert.deepEqual(newTweet.text, returnedTweets[0].text);
+    assert.isDefined(newTweet._id);
+    assert.isDefined(newTweet.date);
+    assert.isDefined(newTweet.author);
+    assert.deepEqual(newTweet.text, newTweetData.text);
   });
 
   test('get one tweet (by id), get all tweets', function () {
-    for (let i = 0; i < tweets.length; i++) {
-      tweetService.newTweet(tweets[i]);
-    }
 
-    const returnedTweets = tweetService.getTweets();
-    const i = getRndInteger(0, tweets.length);
-    const randomTweet = returnedTweets[i];
-    const returnedTweet = tweetService.getTweet(randomTweet._id);
+    const returnedTweet = tweetService.getTweet(newTweet._id.toString());
     assert.isDefined(returnedTweet._id);
     assert.isDefined(returnedTweet.date);
     assert.isDefined(returnedTweet.author);
-    assert.deepEqual(returnedTweet.text, tweets[i].text);
+    assert.deepEqual(returnedTweet.text, newTweet.text);
 
     // get all tweets
+    for (let i = 1; i < tweets.length; i++) {
+      tweetService.newTweet(tweets[i]);
+    }
 
-    assert.equal(returnedTweets.length, tweets.length);
+    allTweets = tweetService.getTweets();
+    assert.equal(allTweets.length, tweets.length);
   });
 
   test('delete one tweet, all tweets', function () {
     const tweetCount = tweets.length;
-    for (let i = 0; i < tweets.length; i++) {
-      tweetService.newTweet(tweets[i]);
-    }
 
-    let returnedTweets = tweetService.getTweets();
-    const randomTweetId = returnedTweets[getRndInteger(0, tweets.length)]._id;
+    const randomTweetId = allTweets[getRndInteger(0, allTweets.length)]._id;
     tweetService.deleteOneTweet(randomTweetId);
-    returnedTweets = tweetService.getTweets();
+    allTweets = tweetService.getTweets();
     assert.isNull(tweetService.getTweet(randomTweetId.toString));
-    assert.equal(returnedTweets.length, tweetCount - 1);
+    assert.equal(allTweets.length, tweetCount - 1);
 
-    returnedTweets = tweetService.getTweets();
-    assert.isAbove(returnedTweets.length, 0);
+    assert.isAbove(allTweets.length, 0);
     tweetService.deleteAllTweets();
-    returnedTweets = tweetService.getTweets();
-    assert.equal(returnedTweets.length, 0);
+    allTweets = tweetService.getTweets();
+    assert.equal(allTweets.length, 0);
   });
 
   test('get all tweets for user', function () {
-    const allUsers = tweetService.getUsers();
     tweetService.logout();
-    allUsers.forEach(function (user) {
+    const regUsers = [user1, user2];
+    regUsers.forEach(function (user) {
+      tweetService.login(user);
       tweets.forEach(function (tweet) {
         const newTweet = {
           text: tweet.text + ' ' + user.firstName,
         };
-        tweetService.login(user);
         tweetService.newTweet(newTweet);
-        tweetService.logout();
       });
+
+      tweetService.logout();
     });
 
-    tweetService.login(allUsers[0]);
-    const rndUser = allUsers[getRndInteger(0, allUsers.length)];
-    let allTweetsForUser = tweetService.getAllTweetsForUser(rndUser._id);
-    const rndTweet = allTweetsForUser[getRndInteger(0, allTweetsForUser.length)];
-    assert.equal(rndTweet.author, rndUser._id);
-    assert.include(rndTweet.text, rndUser.firstName);
-    assert.equal(allTweetsForUser.length, tweets.length);
+    regUsers.forEach(function (user) {
+      let login = {
+        email: user.email,
+        password: user.password,
+      };
 
-    tweetService.deleteAllTweetsForUser(rndUser._id);
-    allTweetsForUser = tweetService.getAllTweetsForUser(rndUser._id);
-    assert.equal(allTweetsForUser.length, 0);
+      tweetService.login(login);
+      let allTweetsForUser = tweetService.getAllTweetsForUser(user._id);
+      const rndTweet = allTweetsForUser[getRndInteger(0, allTweetsForUser.length)];
+      assert.equal(rndTweet.author, user._id);
+      assert.include(rndTweet.text, user.firstName);
+      assert.equal(allTweetsForUser.length, tweets.length);
+
+      tweetService.deleteAllTweetsForUser(user._id);
+      allTweetsForUser = tweetService.getAllTweetsForUser(user._id);
+      assert.equal(allTweetsForUser.length, 0);
+      tweetService.logout();
+    });
   });
 
   test('get all tweets by follows (timeline', function () {
-    let allUsers = tweetService.getUsers();
-    tweetService.deleteAllUsers();
-    for (let i = 0; i < users.length; i++) {
+    tweetService.deleteAllTweets();
+    for (let i = 2; i < users.length; i++) {
       tweetService.createUser(users[i]);
     }
 
-    tweetService.login(allUsers[0]);
-    allUsers = tweetService.getUsers();
+    tweetService.login(user1);
+    const allUsers = tweetService.getUsers();
     tweetService.logout();
     allUsers.forEach(function (user) {
       tweets.forEach(function (tweet) {
@@ -142,4 +145,5 @@ suite('Tweet API tests', function () {
 
     assert.deepEqual(timeline, array);
   });
+
 });

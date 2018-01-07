@@ -13,7 +13,10 @@ module.exports = [
   { method: 'GET', path: '/api/users/~', config: UsersApi.findNonAdmins },
 
   { method: 'DELETE', path: '/api/users/{id}', config: UsersApi.deleteOne },
+    // non-admin only
   { method: 'DELETE', path: '/api/users', config: UsersApi.deleteAll },
+    // all users
+  { method: 'DELETE', path: '/api/users/~', config: UsersApi.delete },
 
   { method: 'POST', path: '/api/users/{id}', config: UsersApi.updateDetails },
   { method: 'GET', path: '/api/users/{id}/follow', config: UsersApi.follow },

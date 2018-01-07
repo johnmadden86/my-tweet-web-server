@@ -3,6 +3,9 @@
 const User = require('../models/user');
 const Boom = require('boom');
 const utils = require('./utils');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const Joi = require('joi');
 
 exports.authenticate = {
   auth: false,
@@ -10,36 +13,42 @@ exports.authenticate = {
     const user = request.payload;
     User.findOne({ email: user.email })
         .then(foundUser => {
-          if (foundUser && foundUser.password === user.password) {
-            const token = utils.createToken(foundUser);
-            reply({
-              success: true,
-              token: token,
-              user: foundUser,
-            }).code(201);
-          } else {
-            reply({
-              success: false,
-              message: 'Authentication failed. User not found.',
-            }).code(201);
-          }
-        })
-        .catch(err => {
-          reply(Boom.notFound('internal db failure'));
-        });
+          console.log(foundUser);
+          bcrypt.compare(user.password, foundUser.password, (err, isValid) => {
+            if (isValid) {
+              const token = utils.createToken(foundUser);
+              reply({
+                success: true,
+                token: token,
+                user: foundUser,
+              }).code(201);
+            } else {
+              reply({
+                success: false,
+                message: 'Authentication failed. User not found. ' + err,
+              }).code(201);
+            }
+          });
+        }).catch(err => {
+      reply(Boom.notFound('internal db failure ' + err));
+    });
   },
 };
 
 exports.create = {
   auth: false,
   handler: function (request, reply) {
-    const user = new User(request.payload);
+    let user = new User(request.payload);
     user.admin = false;
-    user.save()
-        .then(newUser => {
-          reply(newUser).code(201);
-        }).catch(err => {
-      reply(Boom.badImplementation('error creating user'));
+    bcrypt.hash(user.password, saltRounds, (err, hash) => {
+      user.password = hash;
+      user.save()
+          .then(newUser => {
+            reply(newUser).code(201);
+          })
+          .catch(err => {
+            reply(Boom.badImplementation('error creating user'));
+          });
     });
   },
 };
@@ -47,13 +56,17 @@ exports.create = {
 exports.createAdmin = {
   auth: false,
   handler: function (request, reply) {
-    const user = new User(request.payload);
+    let user = new User(request.payload);
     user.admin = true;
-    user.save()
-        .then(newUser => {
-          reply(newUser).code(201);
-        }).catch(err => {
-      reply(Boom.badImplementation('error creating user'));
+    bcrypt.hash(user.password, saltRounds, (err, hash) => {
+      user.password = hash;
+      user.save()
+          .then(newUser => {
+            reply(newUser).code(201);
+          })
+          .catch(err => {
+            reply(Boom.badImplementation('error creating user'));
+          });
     });
   },
 };
@@ -142,6 +155,20 @@ exports.deleteAll = {
   },
 };
 
+exports.delete = {
+  auth: {
+    strategy: 'jwt',
+  },
+  handler: function (request, reply) {
+    User.remove({ })
+        .then(err => {
+          reply().code(204);
+        }).catch(err => {
+      reply(Boom.badImplementation('error removing users'));
+    });
+  },
+};
+
 exports.updateDetails = {
   auth: {
     strategy: 'jwt',
@@ -154,14 +181,16 @@ exports.updateDetails = {
           user.firstName = newDetails.firstName;
           user.lastName = newDetails.lastName;
           user.email = newDetails.email;
-          user.password = newDetails.password;
-          user.save()
-              .then(user => {
-                reply(user).code(201);
-              })
-              .catch(err => {
-                reply(Boom.badImplementation('error updating details'));
-              });
+          bcrypt.hash(newDetails.password, saltRounds, (err, hash) => {
+            user.password = hash;
+            user.save()
+                .then(user => {
+                  reply(user).code(201);
+                })
+                .catch(err => {
+                  reply(Boom.badImplementation('error updating details'));
+                });
+          });
         })
         .catch(err => {
           reply(Boom.notFound('internal db failure, User not found'));
@@ -187,19 +216,18 @@ exports.follow = {
           }
 
           user.save()
-            .then(user => {
-              reply(user).code(201);
-            }) // TODO add followed by
-            .catch(err => {
-              reply(Boom.badImplementation('error following user'));
-            });
+              .then(user => {
+                reply(user).code(201);
+              }) // TODO add followed by
+              .catch(err => {
+                reply(Boom.badImplementation('error following user'));
+              });
         })
         .catch(err => {
-      reply(Boom.notFound('internal db failure, User not found'));
-    });
+          reply(Boom.notFound('internal db failure, User not found'));
+        });
   },
 };
-
 
 exports.unfollow = {
   auth: {
@@ -217,15 +245,15 @@ exports.unfollow = {
           }
 
           user.save()
-            .then(user => {
-              reply(user).code(201);
-            }) // TODO add followed by
-            .catch(err => {
-              reply(Boom.badImplementation('error following user'));
-            });
+              .then(user => {
+                reply(user).code(201);
+              }) // TODO add followed by
+              .catch(err => {
+                reply(Boom.badImplementation('error following user'));
+              });
         })
         .catch(err => {
-      reply(Boom.notFound('internal db failure, User not found'));
-    });
+          reply(Boom.notFound('internal db failure, User not found'));
+        });
   },
 };

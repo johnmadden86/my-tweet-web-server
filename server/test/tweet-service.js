@@ -51,6 +51,10 @@ class TweetService {
     return this.httpService.delete('/api/users');
   }
 
+  delete() {
+    return this.httpService.delete('/api/users/~');
+  }
+
   updateUserDetails(id, details) {
     return this.httpService.post('/api/users/' + id, details);
   }

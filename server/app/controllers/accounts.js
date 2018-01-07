@@ -82,7 +82,8 @@ exports.register = {
             .then(newUser => {
               setCookie(request, newUser._id);
               reply.redirect('/home');
-            }).catch(err => {
+            })
+            .catch(err => {
           reply.redirect('/');
         });
       },

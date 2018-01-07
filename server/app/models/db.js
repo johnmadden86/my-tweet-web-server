@@ -25,7 +25,7 @@ mongoose.connection.on('disconnected', function () {
 mongoose.connection.on('connected', function () {
   console.log('Mongoose connected to ' + dbURI);
   if (process.env.NODE_ENV !== 'production') {
-    seedData();
+    // seedData();
   }
 });
 
