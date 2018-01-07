@@ -1,0 +1,40 @@
+<section class="ui raised segment">
+  <div class="ui grid">
+    <aside class="six wide column">
+      <img src="../images/homer5.jpg" class="ui medium image">
+    </aside>
+    <article class="ten wide column">
+      <table class="ui collapsing table segment">
+        <thead>
+        <tr>
+          <th colspan="2">Tweets for {{profile.firstName}} {{profile.lastName}}</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        {{#each tweets}}
+          <tr>
+            <td title="{{date}}"> {{text}} </td>
+            {{#if ../own}}
+            <td class="center aligned">
+              <a title="Delete Tweet" href="/delete-tweet/{{_id}}">
+                <i class="trash outline icon"></i>
+              </a>
+            </td>
+            {{/if}}
+          </tr>
+        {{/each}}
+        {{#if own}}
+        <tr>
+          <td colspan="2" class="right aligned">
+          <a title="Delete All" href="/delete-all-tweets">
+            <i class="large trash icon"></i>
+          </a>
+          </td>
+        </tr>
+        {{/if}}
+        </tbody>
+      </table>
+    </article>
+  </div>
+</section>

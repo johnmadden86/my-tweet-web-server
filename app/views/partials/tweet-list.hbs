@@ -1,0 +1,30 @@
+<section class="ui raised segment">
+  <div class="ui grid">
+    <aside class="six wide column">
+      <img src="images/homer5.jpg" class="ui medium image">
+    </aside>
+    <article class="ten wide column">
+      <table class="ui celled table segment">
+        <thead>
+        <tr>
+          <th>Message</th>
+          <th>User</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+        {{#each tweets}}
+          <tr>
+            <td title="{{date}}"> {{text}} </td>
+            <td>
+              <a href="/profile/{{author._id}}">
+                {{author.firstName}} {{author.lastName}}
+              </a>
+            </td>
+          </tr>
+        {{/each}}
+        </tbody>
+      </table>
+    </article>
+  </div>
+</section>

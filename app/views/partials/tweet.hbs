@@ -1,0 +1,34 @@
+<section class="ui segment">
+  <div class="ui grid ">
+    <div class="ui form six wide column">
+      <div class="ui segment">
+        <form action="/tweet" method="POST">
+          <div class="field">
+            <label>Enter Text
+              <input id="input" type="text" name="text" oninput="charCount()">
+            </label>
+            <div id="charCount" class="ui horizontal label right aligned">140</div>
+          </div>
+          <button id="button" class="ui blue submit button" disabled>Send Tweet</button>
+        </form>
+      </div>
+    </div>
+    <aside class="six wide column">
+      <img src="images/homer4.jpeg" class="ui medium image">
+    </aside>
+  </div>
+</section>
+<script>
+  function charCount() {
+    let tweetLength = document.getElementById("input").value.length;
+    const charDisplay = document.getElementById("charCount");
+    charDisplay.innerHTML = (140 - tweetLength).toString();
+
+    const button = document.getElementById('button');
+    const disabled = document.createAttribute('disabled');
+    button.setAttributeNode(disabled);
+    button.disabled = tweetLength === 0 || tweetLength > 140;
+
+    tweetLength > 140 ? charDisplay.classList.add('red') : charDisplay.classList.remove('red');
+  }
+</script>
