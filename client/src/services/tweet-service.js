@@ -8,6 +8,7 @@ import AsyncHttpClient from './async-http-client';
 export default class TweetService {
 
   currentUser = {};
+  allUsers = [];
   tweet = {};
   allTweets = [];
   profileTweets = [];
@@ -21,6 +22,7 @@ export default class TweetService {
       this.currentUser = msg.user;
       this.getAllTweetsForUser(msg.user._id);
       this.getTimeline(msg.user._id);
+      this.getUsers();
       console.log('current user: ' + this.currentUser.firstName + ' ' + this.currentUser.lastName);
     });
   }
@@ -75,7 +77,7 @@ export default class TweetService {
   getUsers() {
     this.ac.get('/api/users')
       .then(res => {
-        this.users = res.content;
+        this.allUsers = res.content;
       });
   }
 
@@ -117,6 +119,7 @@ export default class TweetService {
   updateUserDetails(id, details) {
     this.ac.post('/api/users/' + id, details)
       .then(res => {
+        this.currentUser = res.content;
         this.users = this.getUsers();
       });
   }

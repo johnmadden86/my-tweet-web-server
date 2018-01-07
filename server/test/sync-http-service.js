@@ -12,7 +12,7 @@ class SyncHttpService {
     if (res.statusCode === 201) {
       const payload = JSON.parse(res.getBody('utf8'));
       if (payload.success) {
-        this.authHeader = { Authorization: 'bearer ' + payload.token };
+        this.authHeader = { Authorization: payload.token };
         return true;
       }
     }

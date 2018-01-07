@@ -9,6 +9,8 @@ export class Profile {
   constructor(ts) {
     this.tweetService = ts;
     this.tweets = this.tweetService.profileTweets;
-    console.log(this.tweets);
+    this.tweets.forEach(tweet => {
+      tweet.author.fullName = tweet.author.firstName + ' ' + tweet.author.lastName;
+    });
   }
 }

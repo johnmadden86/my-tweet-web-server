@@ -90,7 +90,8 @@ exports.findAll = {
     strategy: 'jwt',
   },
   handler: function (request, reply) {
-    User.find({}).exec()
+    User.find({})
+        .sort({ lastName: 1, firstName: 1 })
         .then(users => {
           reply(users);
         }).catch(err => {
@@ -105,6 +106,7 @@ exports.findAdmins = {
   },
   handler: function (request, reply) {
     User.find({ admin: true })
+        .sort({ lastName: 1, firstName: 1 })
         .then(user => {
           reply(user);
         }).catch(err => {
@@ -119,6 +121,7 @@ exports.findNonAdmins = {
   },
   handler: function (request, reply) {
     User.find({ admin: false })
+        .sort({ lastName: 1, firstName: 1 })
         .then(user => {
           reply(user);
         }).catch(err => {
@@ -176,26 +179,16 @@ exports.updateDetails = {
   handler: function (request, reply) {
     const newDetails = request.payload;
     const userId = utils.getUserIdFromRequest(request);
-    User.findOne({ _id: userId })
-        .then(user => {
-          user.firstName = newDetails.firstName;
-          user.lastName = newDetails.lastName;
-          user.email = newDetails.email;
-          bcrypt.hash(newDetails.password, saltRounds, (err, hash) => {
-            user.password = hash;
-            user.save()
-                .then(user => {
-                  reply(user).code(201);
-                })
-                .catch(err => {
-                  reply(Boom.badImplementation('error updating details'));
-                });
+    bcrypt.hash(newDetails.password, saltRounds, (err, hash) => {
+      newDetails.password = hash;
+      User.findOneAndUpdate({ _id: userId }, newDetails)
+          .then(user => {
+            reply(user).code(200);
+          })
+          .catch(err => {
+            reply(Boom.badImplementation('error updating details'));
           });
-        })
-        .catch(err => {
-          reply(Boom.notFound('internal db failure, User not found'));
-          console.log('User not found');
-        });
+    });
   },
 };
 
@@ -205,7 +198,7 @@ exports.follow = {
   },
   handler: function (request, reply) {
     const userIdToFollow = request.url.query._id;
-    const currentUserId = request.params.id;
+    const currentUserId = utils.getUserIdFromRequest(request);
     User.findOne({ _id: currentUserId })
         .then(user => {
           const index = user.following.indexOf(userIdToFollow);
@@ -214,7 +207,6 @@ exports.follow = {
             // TODO sanitise followId
             user.following.push(userIdToFollow);
           }
-
           user.save()
               .then(user => {
                 reply(user).code(201);
@@ -235,7 +227,7 @@ exports.unfollow = {
   },
   handler: function (request, reply) {
     const userIdToUnfollow = request.url.query._id;
-    const currentUserId = request.params.id;
+    const currentUserId = utils.getUserIdFromRequest(request);
     User.findOne({ _id: currentUserId })
         .then(user => {
           const index = user.following.indexOf(userIdToUnfollow);

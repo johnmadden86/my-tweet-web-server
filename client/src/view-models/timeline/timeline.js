@@ -9,5 +9,8 @@ export class Timeline {
   constructor(ts) {
     this.tweetService = ts;
     this.tweets = this.tweetService.timelineTweets;
+    this.tweets.forEach(tweet => {
+      tweet.author.fullName = tweet.author.firstName + ' ' + tweet.author.lastName;
+    });
   }
 }

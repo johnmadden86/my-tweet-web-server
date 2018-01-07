@@ -44,26 +44,11 @@ exports.validate = function (decoded, request, callback) {
 exports.getUserIdFromRequest = function (request) {
   let userId = null;
   try {
+    // removed 'bearer' prefix in authorization header
+    // no longer need split by space
     const token = request.headers.authorization;
-    console.log('JSON web token: ' + token);
-    const tokenSplit = token.split('.');
-    const header = tokenSplit[0];
-    const payload = tokenSplit[1];
-    const signature = tokenSplit[2];
-    console.log('header: ' + header);
-    console.log('payload: ' + payload);
-    console.log('signature: ' + signature);
-    const decodedHeader = utils.decodeToken(header);
-    const decodedPayload = utils.decodeToken(payload);
-    const decodedSignature = utils.decodeToken(signature);
     const decodedToken = utils.decodeToken(token);
-    console.log(decodedHeader);
-    console.log(decodedPayload);
-    console.log(decodedSignature);
-    console.log(decodedToken);
-
     userId = decodedToken.userId;
-    console.log('userId ' + userId);
   } catch (e) {
     userId = null;
   }

@@ -1,12 +1,24 @@
 <template>
-
-  <section class="ui stacked statistic segment">
-    <div class="value">
-      ${total}
+  <form submit.delegate="updateDetails($event)" class="ui stacked segment form">
+    <h3 class="ui header">Update details</h3>
+    <div class="two fields">
+      <div class="field">
+        <label>First Name</label>
+        <input placeholder="First Name" type="text" value.bind="details.firstName">
+      </div>
+      <div class="field">
+        <label>Last Name</label>
+        <input placeholder="Last Name" type="text" value.bind="details.lastName">
+      </div>
     </div>
-    <div class="label">
-      Total
+    <div class="field">
+      <label>Email</label>
+      <input placeholder="Email" type="text" value.bind="details.email">
     </div>
-  </section>
-
+    <div class="field">
+      <label>Password</label>
+      <input type="password" value.bind="details.password">
+    </div>
+    <button class="ui blue submit button">Submit</button>
+  </form>
 </template>

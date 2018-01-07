@@ -79,12 +79,12 @@ class TweetService {
     return this.httpService.delete('/api/tweets');
   }
 
-  follow(id, followId) {
-    return this.httpService.get('/api/users/' + id + '/follow?_id=' + followId);
+  follow(followId) {
+    return this.httpService.get('/api/users/follow?_id=' + followId);
   }
 
-  unfollow(id, followId) {
-    return this.httpService.get('/api/users/' + id + '/unfollow?_id=' + followId);
+  unfollow(followId) {
+    return this.httpService.get('/api/users/unfollow?_id=' + followId);
   }
 
   getAllTweetsForUser(userId) {

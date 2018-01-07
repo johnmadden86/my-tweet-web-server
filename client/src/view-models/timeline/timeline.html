@@ -12,9 +12,9 @@
         </thead>
         <tbody>
         <tr repeat.for="tweet of tweets">
-          <td> ${tweet.text}</td>
-          <td> ${tweet.date}</td>
-          <td> ${tweet.author}</td>
+          <td>${tweet.text}</td>
+          <td>${tweet.date}</td>
+          <td>${tweet.author.fullName}</td>
         </tr>
         </tbody>
       </table>

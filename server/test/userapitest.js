@@ -46,7 +46,6 @@ suite('User API tests', function () {
   });
 
   test('get one user', function () {
-    tweetService.login(user1);
     const user = tweetService.getUser(user1._id);
     assert.deepEqual(user, user1);
   });
@@ -101,6 +100,7 @@ suite('User API tests', function () {
     };
 
     const userId = user1._id;
+    console.log(userId);
     tweetService.updateUserDetails(userId, details);
     const user = tweetService.getUser(userId);
     assert.equal(user.firstName, details.firstName);
@@ -110,22 +110,14 @@ suite('User API tests', function () {
 
   });
 
-  test('follow new user', function () {
-    const currentUserId = user1._id;
-    console.log('currentUserId ' + currentUserId);
+  test('follow/unfollow new user', function () {
     const userIdToFollow = user2._id;
-    console.log('userIdToFollow ' + userIdToFollow);
-    tweetService.follow(currentUserId, userIdToFollow);
-    assert.notEqual(user1.following.indexOf(userIdToFollow), -1);
-  });
+    tweetService.follow(userIdToFollow);
+    assert.include(user1.following, userIdToFollow);
 
-  test('unfollow user', function () {
-    const currentUserId = user1._id;
-    console.log('currentUserId ' + currentUserId);
-    const userIdToUnfollow = user2._id;
-    console.log('userIdToFollow ' + userIdToUnfollow);
+    const userIdToUnfollow = userIdToFollow;
     tweetService.unfollow(currentUserId, userIdToUnfollow);
-    assert.equal(user1.following.indexOf(userIdToUnfollow), -1);
+    assert.notInclude(user1.following, userIdToUnfollow);
   });
 
   test('delete one user', function () {
@@ -147,4 +139,5 @@ suite('User API tests', function () {
     assert.isNull(tweetService.getNonAdmin());
     tweetService.delete();
   });
+
 });

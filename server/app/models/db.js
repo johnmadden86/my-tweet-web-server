@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 let dbURI = 'mongodb://localhost/myTweet';
 process.env.MONGOLAB_URI = 'mongodb://mytweetwebusername:mytweetwebpassword@ds245805.mlab.com:45805/mytweetweb';
+process.env.NODE_ENV = 'production';
 if (process.env.NODE_ENV === 'production') {
   dbURI = process.env.MONGOLAB_URI;
 }
